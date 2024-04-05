@@ -1,50 +1,119 @@
---made by ScareCrowV3RM
+-- UI Creation
+
+local XRayGui = Instance.new("ScreenGui")
+XRayGui.Name = "XRayGui"
+XRayGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local Frame = Instance.new("Frame")
+Frame.Name = "Frame"
+Frame.Parent = XRayGui
+Frame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0, 10, 0, 10)  -- Adjusted position
+Frame.Size = UDim2.new(0, 180, 0, 70)  -- Narrower width
+Frame.Active = true
+Frame.Draggable = true
+
+local MadeByText = Instance.new("TextLabel")
+MadeByText.Name = "MadeByText"
+MadeByText.Parent = Frame
+MadeByText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MadeByText.BackgroundTransparency = 1.000
+MadeByText.Size = UDim2.new(0, 100, 0, 15)  -- Adjusted size
+MadeByText.Position = UDim2.new(0, 5, 0, 5)  -- Adjusted position
+MadeByText.AnchorPoint = Vector2.new(0, 0)
+MadeByText.Font = Enum.Font.Arial
+MadeByText.Text = "by sh4kar60"
+MadeByText.TextColor3 = Color3.fromRGB(255, 255, 255)
+MadeByText.TextSize = 12.000
+
+local XRayText = Instance.new("TextLabel")
+XRayText.Name = "XRayText"
+XRayText.Parent = Frame
+XRayText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+XRayText.BackgroundTransparency = 1.000
+XRayText.Size = UDim2.new(0, 100, 0, 15)
+XRayText.Position = UDim2.new(0, 5, 0, 25)  -- Adjusted position
+XRayText.AnchorPoint = Vector2.new(0, 0)
+XRayText.Font = Enum.Font.Arial
+XRayText.Text = "X-Ray: Off"
+XRayText.TextColor3 = Color3.fromRGB(255, 255, 255)
+XRayText.TextSize = 12.000
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = Frame
+ToggleButton.BackgroundColor3 = Color3.fromRGB(66, 66, 66)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Position = UDim2.new(0, 0, 1, -30)
+ToggleButton.Size = UDim2.new(1, 0, 0, 30)
+ToggleButton.Font = Enum.Font.ArialBold
+ToggleButton.Text = "Toggle X-Ray"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextScaled = true
+ToggleButton.TextSize = 14.000
+ToggleButton.TextStrokeTransparency = 0.000
+ToggleButton.TextWrapped = true
+
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = Frame
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+CloseButton.BorderSizePixel = 0
+CloseButton.Position = UDim2.new(1, -25, 0, 0)
+CloseButton.Size = UDim2.new(0, 25, 0, 25)
+CloseButton.Font = Enum.Font.ArialBold
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextScaled = true
+CloseButton.TextSize = 14.000
+CloseButton.TextStrokeTransparency = 0.000
+CloseButton.TextWrapped = true
+
+-- X-Ray Functionality
+
 local xrayHotkey = Enum.KeyCode.E
-
 local uis = game:GetService("UserInputService")
-
-
 local xrayOn = false
 
+local function toggleXRay()
+    xrayOn = not xrayOn
+    for i, descendant in pairs(workspace:GetDescendants()) do
+        if descendant:IsA("BasePart") then
+            if xrayOn then
+                if not descendant:FindFirstChild("OriginalTransparency") then
+                    local originalTransparency = Instance.new("NumberValue")
+                    originalTransparency.Name = "OriginalTransparency"
+                    originalTransparency.Value = descendant.Transparency
+                    originalTransparency.Parent = descendant
+                end
+                descendant.Transparency = 0.5
+            else
+                descendant.Transparency = descendant:FindFirstChild("OriginalTransparency") and descendant.OriginalTransparency.Value or 0
+            end
+        end
+    end
+    XRayText.Text = xrayOn and "X-Ray: On" or "X-Ray: Off"
+end
 
 uis.InputBegan:Connect(function(inp, processed)
- 
- 
- if processed then return end
- 
- 
- if inp.KeyCode == xrayHotkey then
-  
-  
-  xrayOn = not xrayOn
-  
-  
-  for i, descendant in pairs(workspace:GetDescendants()) do
-    
-   if descendant:IsA("BasePart") then
-    
-    if xrayOn then
-     
-     if not descendant:FindFirstChild("OriginalTransparency") then
-      
-      local originalTransparency = Instance.new("NumberValue")
-      originalTransparency.Name = "OriginalTransparency"
-      originalTransparency.Value = descendant.Transparency
-      originalTransparency.Parent = descendant
-     end
-     
-     descendant.Transparency = 0.5
-     
-    else
-     descendant.Transparency = descendant.OriginalTransparency.Value
+    if processed then return end
+    if inp.KeyCode == xrayHotkey then
+        toggleXRay()
     end
-   end
-  end
- end
 end)
 
-game.StarterGui:SetCore("SendNotification", {
-Title = "Xray Script Loaded"; 
-Text = "Use The Key E To Toggle On And Off"; 
-Duration = 5; 
-})
+-- Toggle Button Click Event
+
+ToggleButton.MouseButton1Click:Connect(function()
+    toggleXRay()
+end)
+
+-- Close Button Click Event
+
+CloseButton.MouseButton1Click:Connect(function()
+    XRayGui:Destroy()
+    if xrayOn then
+        toggleXRay()
+    end
+end)
